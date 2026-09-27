@@ -1,0 +1,95 @@
+#include <iostream>
+#include <windows.h>
+#include <vector>
+
+// Trạng thái menu và các tính năng hack do boss man yêu cầu
+struct HackSettings {
+    bool menuOpen = true;
+    bool espEnabled = true;
+    bool espBox = true;
+    bool espHP = true;
+    bool espName = true;
+    bool espDistance = true;
+    bool aimbotEnabled = true;
+    bool autoShoot = true;
+    float fovSize = 120.0f; // Nút giả lập FOV / điều chỉnh trên màn hình
+};
+
+HackSettings settings;
+
+// Hàm giả lập giao diện menu overlay trực quan
+void RenderOverlayMenu() {
+    if (!settings.menuOpen) return;
+
+    std::cout << "\n=========================================\n";
+    std::cout << "       HUZ GAME HACK OVERLAY MENU        \n";
+    std::cout << "=========================================\n";
+    std::cout << "[F1] Menu Toggle: " << (settings.menuOpen ? "ON" : "OFF") << "\n";
+    std::cout << "[F2] ESP Xanh La (Box+HP+Ten+Khoang Cach): " << (settings.espEnabled ? "ACTIVE" : "OFF") << "\n";
+    std::cout << "[F3] Aimbot (Ghim Dau + Tu Ban): " << (settings.aimbotEnabled ? "ACTIVE" : "OFF") << "\n";
+    std::cout << "[F4] FOV Controller (Gia lap PC): " << settings.fovSize << "\n";
+    std::cout << "=========================================\n";
+}
+
+// Xử lý logic ESP vẽ thông tin lên màn hình
+void ProcessESP() {
+    if (!settings.espEnabled) return;
+
+    // Giả lập dữ liệu quét mục tiêu trong game
+    struct Player {
+        std::string name;
+        int hp;
+        float distance;
+        bool isEnemy;
+    };
+
+    std::vector<Player> players = {
+        {"Enemy_No1", 100, 15.4f, true},
+        {"Enemy_No2", 45, 8.2f, true}
+    };
+
+    for (const auto& p : players) {
+        if (p.isEnemy) {
+            std::cout << "[ESP XANH LA] Ve khung | Ten: " << p.name 
+                      << " | HP: " << p.hp 
+                      << " | Khoang cach: " << p.distance << "m\n";
+        }
+    }
+}
+
+// Xử lý Aimbot tự ghim đầu và tự bắn khi địch lại gần
+void ProcessAimbotAndAutoShoot() {
+    if (!settings.aimbotEnabled) return;
+
+    float triggerDistanceThreshold = 10.0f; // Khi địch lại gần trong khoảng này
+    float currentEnemyDistance = 8.2f;      // Khoảng cách giả định tới địch
+
+    if (currentEnemyDistance <= triggerDistanceThreshold) {
+        std::cout << "[AIMBOT] Phat hien dich o gan! Tu dong ghim vao dau...\n";
+        if (settings.autoShoot) {
+            std::cout << "[AUTO-SHOOT] Bop cò! Tiêu diệt mục tiêu gọn gàng!\n";
+        }
+    }
+}
+
+int main() {
+    SetConsoleTitleA("HUZ Overlay Engine - Full Custom Suite");
+    std::cout << "Dang khoi tao he thống overlay...\n";
+
+    // Vòng lặp chạy chính của hack
+    while (true) {
+        // Nhấn phím ảo để bật tắt menu hoặc điều chỉnh FOV
+        if (GetAsyncKeyState(VK_F1) & 1) {
+            settings.menuOpen = !settings.menuOpen;
+            RenderOverlayMenu();
+        }
+
+        // Thực thi các tính năng nếu menu hoặc script đang chạy ngầm
+        ProcessESP();
+        ProcessAimbotAndAutoShoot();
+
+        Sleep(1000); // Nghỉ ngắn để đỡ tốn tài nguyên CPU, mượt mà không giật lag
+    }
+
+    return 0;
+}
